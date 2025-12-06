@@ -50,21 +50,21 @@ jobs:
         python generate_parity_plots.py
     
     - name: Upload parity plots
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: parity-plots
         path: output/*.png
         retention-days: 30
     
     - name: Upload comparison table
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: comparison-data
         path: output/comparison_table.csv
         retention-days: 30
     
     - name: Upload summary report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: summary-report
         path: output/summary_report.txt
@@ -105,10 +105,10 @@ jobs:
     
     - name: Run 100 iterations
       run: |
-        python run_100_iterations.py
+        python run_n_iterations.py
     
     - name: Upload iteration results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ml-iterations-results
         path: output/ml_iterations_*.xlsx
