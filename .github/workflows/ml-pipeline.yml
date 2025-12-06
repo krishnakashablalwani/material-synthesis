@@ -70,7 +70,7 @@ jobs:
         path: output/summary_report.txt
         retention-days: 30
 
-  run-100-iterations:
+  run-1000-iterations:
     runs-on: ubuntu-latest
     # Run on push, manual trigger, or weekly schedule
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
@@ -103,9 +103,9 @@ jobs:
         CS,53,2.2,1.90,1.81,2.150,31.7,0.05
         EOF
     
-    - name: Run 100 iterations
+    - name: Run 1000 iterations
       run: |
-        python run_n_iterations.py
+        python run_n_iterations.py 1000
     
     - name: Upload iteration results
       uses: actions/upload-artifact@v4
