@@ -1,0 +1,211 @@
+"""
+Simple Parity Plot Generator
+Usage: Just run this script - it will create all plots automatically
+"""
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from pathlib import Path
+
+# Set style
+sns.set_style("whitegrid")
+plt.rcParams['font.size'] = 10
+
+
+def load_data():
+    """Load experimental and theoretical data"""
+    exp = pd.read_csv('data/experimental_photocatalysis.csv')
+    theo = pd.read_excel('data/theoretical_photocatalysis.xlsx')
+    return exp, theo
+
+
+def create_parity_plots(exp, theo, output_dir='.'):
+    """Create individual parity plots for each property"""
+    
+    # Get numeric columns (skip 'Sample' column)
+    properties = [col for col in exp.columns if col != 'Sample']
+    
+    print("\nGenerating parity plots...")
+    print("="*60)
+    
+    saved_files = []
+    
+    for prop in properties:
+        # Create individual figure
+        fig, ax = plt.subplots(figsize=(8, 7))
+        
+        # Get experimental and theoretical values
+        exp_vals = exp[prop].values
+        theo_vals = theo[prop].values
+        
+        # Calculate statistics
+        from sklearn.metrics import r2_score, mean_absolute_error
+        r2 = r2_score(theo_vals, exp_vals)
+        mae = mean_absolute_error(theo_vals, exp_vals)
+        percent_error = np.abs((exp_vals - theo_vals) / theo_vals * 100)
+        mean_error = percent_error.mean()
+        
+        # Plot
+        ax.scatter(theo_vals, exp_vals, s=150, alpha=0.7, 
+                  edgecolors='black', linewidth=1.5, c='steelblue')
+        
+        # Perfect agreement line
+        min_val = min(exp_vals.min(), theo_vals.min())
+        max_val = max(exp_vals.max(), theo_vals.max())
+        padding = (max_val - min_val) * 0.1
+        
+        ax.plot([min_val-padding, max_val+padding], 
+               [min_val-padding, max_val+padding], 
+               'r--', lw=2, alpha=0.7, label='Perfect Agreement')
+        
+        # ±10% error bands
+        x_range = np.linspace(min_val-padding, max_val+padding, 100)
+        ax.fill_between(x_range, x_range*0.9, x_range*1.1, 
+                       alpha=0.15, color='gray', label='±10% Error')
+        
+        # Labels
+        ax.set_xlabel('Theoretical', fontsize=13, fontweight='bold')
+        ax.set_ylabel('Experimental', fontsize=13, fontweight='bold')
+        ax.set_title(prop, fontsize=14, fontweight='bold', pad=15)
+        ax.legend(loc='upper left', fontsize=10)
+        ax.grid(True, alpha=0.3)
+        
+        # Add statistics text box
+        stats_text = f'R² = {r2:.3f}\nMAE = {mae:.3f}\nError = {mean_error:.1f}%'
+        ax.text(0.95, 0.05, stats_text, transform=ax.transAxes,
+               fontsize=11, verticalalignment='bottom', horizontalalignment='right',
+               bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+        
+        # Save individual plot
+        safe_name = prop.replace('/', '_').replace('(', '').replace(')', '').replace(' ', '_').replace('^', '')
+        output_path = Path(output_dir) / f'output/parity_{safe_name}.png'
+        plt.tight_layout()
+        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        plt.close()
+        
+        saved_files.append(output_path)
+        
+        # Print statistics
+        print(f"\n{prop}:")
+        print(f"  R² Score: {r2:.3f}")
+        print(f"  Mean Absolute Error: {mae:.3f}")
+        print(f"  Mean % Error: {mean_error:.1f}%")
+        print(f"  ✓ Saved: {output_path}")
+    
+    print("\n" + "="*60)
+    return saved_files
+
+
+def create_comparison_table(exp, theo, output_dir='.'):
+    """Create a table comparing experimental vs theoretical values"""
+    
+    # Prepare comparison data
+    comparison = []
+    for idx, sample in enumerate(exp['Sample']):
+        for col in exp.columns:
+            if col == 'Sample':
+                continue
+            exp_val = exp.loc[idx, col]
+            theo_val = theo.loc[idx, col]
+            error = abs(exp_val - theo_val) / theo_val * 100
+            
+            comparison.append({
+                'Sample': sample,
+                'Property': col,
+                'Experimental': exp_val,
+                'Theoretical': theo_val,
+                'Error (%)': round(error, 2)
+            })
+    
+    df_comp = pd.DataFrame(comparison)
+    output_path = Path(output_dir) / 'output/comparison_table.csv'
+    df_comp.to_csv(output_path, index=False)
+    print(f"✓ Saved: {output_path}")
+    
+    return df_comp
+
+
+def create_summary_report(exp, theo, output_dir='.'):
+    """Create a simple summary report"""
+    
+    report = []
+    report.append("SUMMARY REPORT")
+    report.append("="*60)
+    report.append(f"\nNumber of samples: {len(exp)}")
+    report.append(f"Number of properties: {len(exp.columns) - 1}")
+    report.append(f"\nSamples: {', '.join(exp['Sample'].tolist())}")
+    
+    report.append("\n\nOVERALL STATISTICS:")
+    report.append("-"*60)
+    
+    from sklearn.metrics import r2_score, mean_absolute_error
+    
+    for col in exp.columns:
+        if col == 'Sample':
+            continue
+        exp_vals = exp[col].values
+        theo_vals = theo[col].values
+        
+        r2 = r2_score(theo_vals, exp_vals)
+        mae = mean_absolute_error(theo_vals, exp_vals)
+        mean_error = np.abs((exp_vals - theo_vals) / theo_vals * 100).mean()
+        
+        report.append(f"\n{col}:")
+        report.append(f"  R² = {r2:.3f}")
+        report.append(f"  MAE = {mae:.3f}")
+        report.append(f"  Mean Error = {mean_error:.1f}%")
+    
+    report_text = "\n".join(report)
+    
+    output_path = Path(output_dir) / 'output/summary_report.txt'
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(report_text)
+    
+    print(f"✓ Saved: {output_path}")
+    print("\n" + report_text)
+
+
+def main():
+    print("\n" + "="*60)
+    print("PARITY PLOT GENERATOR")
+    print("="*60)
+    
+    try:
+        # Load data
+        print("\nLoading data...")
+        exp, theo = load_data()
+        print(f"✓ Loaded {len(exp)} samples")
+        
+        # Create plots
+        saved_files = create_parity_plots(exp, theo)
+        
+        # Create comparison table
+        print("\nCreating comparison table...")
+        create_comparison_table(exp, theo)
+        
+        # Create summary report
+        print("\nCreating summary report...")
+        create_summary_report(exp, theo)
+        
+        print("\n" + "="*60)
+        print(f"DONE! Created {len(saved_files)} individual parity plots:")
+        for f in saved_files:
+            print(f"  - {f.name}")
+        print("\nAlso created:")
+        print("  - comparison_table.csv")
+        print("  - summary_report.txt")
+        print("="*60 + "\n")
+        
+    except FileNotFoundError as e:
+        print(f"\n❌ Error: Could not find required files")
+        print("   Make sure these files exist:")
+        print("   - experimental_photocatalysis.csv")
+        print("   - theoretical_photocatalysis.xlsx")
+    except Exception as e:
+        print(f"\n❌ Error: {e}")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,44 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Output files (keep structure but not generated content)
+output/*.png
+output/*.csv
+output/*.txt
+output/*.xlsx
+
+# Keep output directory structure
+!output/.gitkeep
+
+# Data files - keep structure
+data/*.xlsx
+!data/.gitkeep
+
+# PDF papers
+*.pdf
