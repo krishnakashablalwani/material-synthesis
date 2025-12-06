@@ -1,8 +1,3 @@
-"""
-Run ML training and parity plot generation 100 times
-Collect statistics (R2, MAE, Mean Error) for each run
-"""
-
 import pandas as pd
 import numpy as np
 import sys
@@ -12,31 +7,24 @@ from datetime import datetime
 import warnings
 warnings.filterwarnings('ignore')
 
-# Add current directory to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-n_iterations = 1000
+n_iterations = 10
 
-# Import the ML predictor and statistics functions
 from train_ml_models import PhotocatalysisPredictor
 from sklearn.metrics import r2_score, mean_absolute_error
 
 
 def run_single_iteration(exp_df):
-    """Run one iteration of training and evaluation"""
-    
-    # Initialize and train ML models (suppress output)
     import io
     import contextlib
     
-    # Redirect stdout to suppress training messages
     f = io.StringIO()
     with contextlib.redirect_stdout(f):
         predictor = PhotocatalysisPredictor()
         predictor.train_models()
         predictions_df = predictor.predict_properties(exp_df)
     
-    # Calculate statistics for each property
     stats = {}
     
     properties = [col for col in exp_df.columns if col != 'Sample']
@@ -45,7 +33,6 @@ def run_single_iteration(exp_df):
         exp_vals = exp_df[prop].values
         theo_vals = predictions_df[prop].values
         
-        # Calculate metrics
         r2 = r2_score(theo_vals, exp_vals)
         mae = mean_absolute_error(theo_vals, exp_vals)
         percent_error = np.abs((exp_vals - theo_vals) / theo_vals * 100)
@@ -67,22 +54,17 @@ def main():
     print("\nThis will take a few minutes...")
     print("Collecting R2, MAE, and Mean Error for each property across 100 runs")
     
-    # Load experimental data once
     exp_df = pd.read_csv('data/experimental_photocatalysis.csv')
     print(f"\nLoaded {len(exp_df)} samples: {', '.join(exp_df['Sample'].tolist())}")
     
-    # Store results
     all_results = []
-    
     
     for i in range(n_iterations):
         print(f"\r[{i+1}/{n_iterations}] Running iteration {i+1}...", end='', flush=True)
         
         try:
-            # Run one iteration
             stats = run_single_iteration(exp_df)
             
-            # Store results for this iteration
             result_row = {'Iteration': i + 1}
             
             for prop_name, metrics in stats.items():
@@ -98,17 +80,14 @@ def main():
     
     print(f"\n\nCompleted {len(all_results)} successful iterations!")
     
-    # Convert to DataFrame
     df_results = pd.DataFrame(all_results)
     
-    # Calculate summary statistics
     print("\n" + "="*70)
     print("CALCULATING SUMMARY STATISTICS")
     print("="*70)
     
     summary_data = []
     
-    # Get all properties
     properties = set()
     for col in df_results.columns:
         if col != 'Iteration':
@@ -155,19 +134,16 @@ def main():
     
     df_summary = pd.DataFrame(summary_data)
     
-    # Save results
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     
     output_dir = Path('output')
     output_dir.mkdir(exist_ok=True)
     
-    # Save all iterations
-    all_results_file = output_dir / f'ml_iterations_all_results_{timestamp}.xlsx'
+    all_results_file = output_dir / f'ml_iterations_all_results_{n_iterations}.xlsx'
     df_results.to_excel(all_results_file, index=False)
     print(f"\nSaved all iteration results: {all_results_file}")
     
-    # Save summary statistics
-    summary_file = output_dir / f'ml_iterations_summary_{timestamp}.xlsx'
+    summary_file = output_dir / f'ml_iterations_summary_{n_iterations}.xlsx'
     
     with pd.ExcelWriter(summary_file, engine='openpyxl') as writer:
         df_summary.to_excel(writer, sheet_name='Summary', index=False)
@@ -175,7 +151,6 @@ def main():
     
     print(f"Saved summary statistics: {summary_file}")
     
-    # Print summary to console
     print("\n" + "="*70)
     print("SUMMARY STATISTICS (Mean +/- Std)")
     print("="*70)

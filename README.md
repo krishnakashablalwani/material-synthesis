@@ -2,66 +2,70 @@
 
 [![ML Training and Parity Plots](https://github.com/krishnakashablalwani/material-synthesis/actions/workflows/ml-pipeline.yml/badge.svg)](https://github.com/krishnakashablalwani/material-synthesis/actions/workflows/ml-pipeline.yml)
 
-AI/ML-powered tool for comparing experimental photocatalysis data with theoretical predictions using machine learning models.
+Compare experimental photocatalysis data with AI-generated theoretical predictions using machine learning.
 
-## Features
+## Overview
 
-- **Machine Learning Models**: Random Forest & Gradient Boosting algorithms trained on literature data
-- **Automated Parity Plots**: Individual plots for 7 photocatalysis properties
-- **Statistical Analysis**: R², MAE, and Mean Error calculations
-- **100 Iteration Analysis**: Comprehensive statistical validation across multiple runs
-- **GitHub Actions**: Automated CI/CD pipeline for continuous testing
+This tool trains Random Forest and Gradient Boosting models on literature-based ZnFe₂O₄ photocatalysis data, generates theoretical predictions for your experimental samples, and creates publication-ready parity plots with statistical analysis.
 
 ## Quick Start
 
-### 1. Clone the Repository
 ```bash
 git clone https://github.com/krishnakashablalwani/material-synthesis.git
 cd material-synthesis
-```
-
-### 2. Install Dependencies
-```bash
 pip install -r requirements.txt
 ```
 
-### 3. Add Your Data
-Place your experimental data in `data/experimental_photocatalysis.csv`:
+## Usage
+
+### 1. Prepare Your Data
+
+Edit `data/experimental_photocatalysis.csv`:
+
 ```csv
 Sample,Crystallite size (nm),Surface area (m2 g^-1),Band gap direct (eV),Band gap indirect (eV),Rate constant (k x 10^-1 / h),Rate of hydrogen evolved (umol (h g.cat)^-1),Quantum yield (%)
 μS 10 min,47,2.3,1.93,1.83,1.390,99.2,0.14
-...
+μS 30 min,35,4.6,1.93,1.83,2.320,133.5,0.19
+μS 150 min,29,5.6,1.93,1.83,0.005,92.2,0.13
+CS,53,2.2,1.90,1.81,2.150,31.7,0.05
 ```
 
-### 4. Generate Predictions and Plots
+### 2. Train Models & Generate Theoretical Values
 
-#### Train ML models and generate theoretical values:
 ```bash
 python train_ml_models.py
 ```
 
-#### Create parity plots:
+Trains ML models on literature data and generates `data/theoretical_photocatalysis.xlsx`.
+
+### 3. Create Parity Plots
+
 ```bash
 python generate_parity_plots.py
 ```
 
-#### Run 100 iterations for statistical validation:
+Generates 7 individual parity plots in `output/` directory plus comparison table and summary report.
+
+### 4. Run Statistical Validation (Optional)
+
 ```bash
-python run_n_iterations.py
+python run_n_iterations.py 1000
 ```
+
+Runs 1000 training iterations with different random seeds and generates:
+- `ml_iterations_all_results_1000.xlsx` - All iteration metrics
+- `ml_iterations_summary_1000.xlsx` - Statistical summary (mean, std, min, max)
 
 ## Output Files
 
-All outputs are saved to the `output/` directory:
-
 ### Single Run
-- `parity_[PropertyName].png` - Individual parity plots (7 files)
-- `comparison_table.csv` - Side-by-side experimental vs theoretical comparison
-- `summary_report.txt` - Statistical summary (R², MAE, Mean Error)
+- `parity_[Property].png` - Individual parity plots (7 files)
+- `comparison_table.csv` - Experimental vs theoretical comparison
+- `summary_report.txt` - R², MAE, Mean Error statistics
 
-### 100 Iterations
-- `ml_iterations_all_results_[timestamp].xlsx` - All 100 runs with metrics for each property
-- `ml_iterations_summary_[timestamp].xlsx` - Summary statistics (mean, std, min, max, median)
+### Multiple Iterations
+- `ml_iterations_all_results_N.xlsx` - All N runs with complete metrics
+- `ml_iterations_summary_N.xlsx` - Summary statistics across all runs
 
 ## Properties Analyzed
 
@@ -73,43 +77,56 @@ All outputs are saved to the `output/` directory:
 6. Rate of hydrogen evolved (μmol (h g.cat)⁻¹)
 7. Quantum yield (%)
 
-## Machine Learning Approach
+## Machine Learning Details
 
-The models are trained on synthetic data derived from literature values for ZnFe₂O₄ and similar spinel ferrites:
-- **Training samples**: 18 datapoints (microwave vs conventional synthesis)
-- **Features**: Synthesis time and method
-- **Algorithms**: Random Forest & Gradient Boosting (best performer selected via cross-validation)
+**Training Data**: 18 synthetic samples from ZnFe₂O₄ literature (microwave vs conventional synthesis)
 
-## GitHub Actions Workflow
+**Features**: 
+- Synthesis time (minutes)
+- Synthesis method (microwave=1, conventional=0)
 
-The repository includes automated CI/CD:
+**Models**:
+- Random Forest (100 trees, max_depth=5)
+- Gradient Boosting (100 trees, max_depth=3)
+- Best model selected via 3-fold cross-validation
 
-### On Every Push/PR
-- Trains ML models
+**Randomization**: Each training run uses different random seeds for model variability
+
+## Time Complexity
+
+- Single run: ~5 seconds
+- 1000 iterations: ~50-70 minutes
+- Complexity: O(iterations × 7 properties × 100 trees × 18 samples × log(100))
+
+## GitHub Actions
+
+Automated workflows run on every push:
+
+**Standard Job**:
+- Trains models
 - Generates parity plots
-- Uploads artifacts (plots, tables, reports)
+- Uploads artifacts
 
-### Weekly or Manual Trigger
-- Runs 100 iterations for comprehensive validation
-- Generates statistical summary
-- Uploads iteration results
+**1000 Iterations Job**:
+- Runs complete statistical validation
+- Generates iteration results
+- Uploads Excel summaries
 
-**Manually trigger 100 iterations**: Go to Actions → ML Training and Parity Plots → Run workflow
+Manually trigger workflows: Actions tab → Run workflow
 
 ## Project Structure
 
 ```
 material-synthesis/
-├── .github/workflows/
-│   └── ml-pipeline.yml          # GitHub Actions workflow
+├── .github/workflows/ml-pipeline.yml  # CI/CD automation
 ├── data/
-│   └── experimental_photocatalysis.csv  # Your experimental data
-├── output/                      # Generated plots and reports
-├── train_ml_models.py          # ML model training
-├── generate_parity_plots.py    # Parity plot generation
-├── run_n_iterations.py         # 100 iteration runner
-├── requirements.txt            # Python dependencies
-└── README.md
+│   ├── experimental_photocatalysis.csv  # Your data
+│   └── theoretical_photocatalysis.xlsx  # AI predictions
+├── output/                              # Generated plots & reports
+├── train_ml_models.py                   # ML training
+├── generate_parity_plots.py             # Plot generation
+├── run_n_iterations.py                  # Statistical validation
+└── requirements.txt                     # Dependencies
 ```
 
 ## Requirements
@@ -122,27 +139,14 @@ material-synthesis/
 - scikit-learn
 - openpyxl
 
-## For Your Teacher
+## Understanding the Plots
 
-This project demonstrates:
-- **Machine Learning**: Ensemble methods (Random Forest, Gradient Boosting) for materials property prediction
-- **Statistical Validation**: R² scores, Mean Absolute Error, percentage error analysis
-- **Reproducibility**: Automated workflows, version control, comprehensive documentation
-- **Data Visualization**: Publication-ready parity plots with error bands
+**Perfect Agreement Line (red dashed)**: Ideal experimental = theoretical
 
-## License
+**±10% Error Band (gray)**: Acceptable measurement range
 
-MIT License - Feel free to use for research and education
+**R² Score**: Model fit quality (1.0 = perfect)
 
-## Citation
+**MAE**: Mean Absolute Error
 
-If you use this tool in your research, please cite:
-```
-[Your Paper Title]
-[Authors]
-[Journal/Conference, Year]
-```
-
-## Contact
-
-For questions or issues, please open an issue on GitHub.
+**Mean Error (%)**: Average percentage deviation
