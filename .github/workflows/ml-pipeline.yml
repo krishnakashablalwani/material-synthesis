@@ -72,8 +72,8 @@ jobs:
 
   run-100-iterations:
     runs-on: ubuntu-latest
-    # Only run on manual trigger or weekly schedule
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    # Run on push, manual trigger, or weekly schedule
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
     
     steps:
     - name: Checkout repository
