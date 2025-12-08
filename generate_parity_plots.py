@@ -18,6 +18,9 @@ def load_data():
 def create_parity_plots(exp, theo, output_dir='.'):
     properties = [col for col in exp.columns if col != 'Sample']
     
+    output_path_dir = Path(output_dir) / 'output'
+    output_path_dir.mkdir(parents=True, exist_ok=True)
+    
     print("\nGenerating parity plots...")
     print("="*60)
     
@@ -169,11 +172,14 @@ def main():
         
     except FileNotFoundError as e:
         print(f"\n❌ Error: Could not find required files")
+        print(f"   Details: {e}")
         print("   Make sure these files exist:")
-        print("   - experimental_photocatalysis.csv")
-        print("   - theoretical_photocatalysis.xlsx")
+        print("   - data/experimental_photocatalysis.csv")
+        print("   - data/theoretical_photocatalysis.xlsx")
     except Exception as e:
+        import traceback
         print(f"\n❌ Error: {e}")
+        traceback.print_exc()
 
 
 if __name__ == "__main__":
