@@ -31,8 +31,10 @@ Thumbs.db
 output/*.png
 output/comparison_table.csv
 output/summary_report.txt
+
 # Allow iteration results to be committed
-# output/*.xlsx
+!output/*.xlsx
+!output/ml_iterations_*.xlsx
 
 # Keep output directory structure
 !output/.gitkeep
@@ -43,5 +45,3 @@ data/*.xlsx
 
 # PDF papers
 *.pdf
-
-output
