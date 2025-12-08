@@ -70,22 +70,22 @@ jobs:
         path: output/summary_report.txt
         retention-days: 30
 
-  run-1000-iterations:
+  run-n-iterations:
     runs-on: ubuntu-latest
     # Run on push, manual trigger, or weekly schedule
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
     
+    permissions:
+      contents: write
+    
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+      uses: actions/checkout@v4
     
     - name: Configure git
       run: |
         git config --global user.email "krishnakashab@github.com"
         git config --global user.name "krishnakashablalwani"
-        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
     
     - name: Set up Python
       uses: actions/setup-python@v4
