@@ -173,20 +173,32 @@ def main():
     
     print("\nPushing results to GitHub...")
     try:
-        subprocess.run(['git', 'add', 'output/ml_iterations_*.xlsx'], check=False, cwd=os.getcwd())
+        print(f"  Adding files: output/ml_iterations_*.xlsx")
+        add_result = subprocess.run(['git', 'add', 'output/ml_iterations_*.xlsx'], 
+                                   capture_output=True, text=True, cwd=os.getcwd())
+        print(f"  Git add output: {add_result.stdout}{add_result.stderr}")
+        
+        status_result = subprocess.run(['git', 'status', '--short'], 
+                                      capture_output=True, text=True, cwd=os.getcwd())
+        print(f"  Git status:\n{status_result.stdout}")
+        
         result = subprocess.run(['git', 'commit', '-m', f'Add ML iteration results: {n_iterations} iterations completed'], 
                                capture_output=True, text=True, cwd=os.getcwd())
+        print(f"  Commit result: {result.stdout}{result.stderr}")
+        
         if result.returncode == 0:
+            print(f"  Pushing to origin/main...")
             push_result = subprocess.run(['git', 'push', 'origin', 'main'], 
                                         capture_output=True, text=True, cwd=os.getcwd())
+            print(f"  Push output: {push_result.stdout}{push_result.stderr}")
             if push_result.returncode == 0:
                 print("✓ Results pushed to GitHub successfully!")
             else:
-                print(f"⚠ Warning: Git push failed: {push_result.stderr}")
+                print(f"⚠ Warning: Git push failed (return code {push_result.returncode})")
         elif "nothing to commit" in result.stdout or "nothing to commit" in result.stderr:
             print("✓ Excel files already up-to-date on GitHub")
         else:
-            print(f"⚠ Warning: Git commit failed: {result.stderr}")
+            print(f"⚠ Warning: Git commit failed (return code {result.returncode})")
     except subprocess.CalledProcessError as e:
         print(f"⚠ Warning: Could not push to GitHub: {e}")
     
