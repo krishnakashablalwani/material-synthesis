@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import sys
 import os
+import subprocess
 from pathlib import Path
 from datetime import datetime
 import warnings
@@ -9,7 +10,7 @@ warnings.filterwarnings('ignore')
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-n_iterations = 1000
+n_iterations = 10
 
 from train_ml_models import PhotocatalysisPredictor
 from sklearn.metrics import r2_score, mean_absolute_error
@@ -168,6 +169,18 @@ def main():
     print("\n" + "="*70)
     print(f"COMPLETE! Ran {len(all_results)} successful iterations out of {n_iterations}")
     print(f"Results saved to: {output_dir}/")
+    print("="*70)
+    
+    print("\nPushing results to GitHub...")
+    try:
+        subprocess.run(['git', 'add', 'output/ml_iterations_*.xlsx'], check=True, cwd=os.getcwd())
+        subprocess.run(['git', 'commit', '-m', f'Add ML iteration results: {n_iterations} iterations completed'], 
+                      check=True, cwd=os.getcwd())
+        subprocess.run(['git', 'push'], check=True, cwd=os.getcwd())
+        print("✓ Results pushed to GitHub successfully!")
+    except subprocess.CalledProcessError as e:
+        print(f"⚠ Warning: Could not push to GitHub: {e}")
+    
     print("="*70 + "\n")
 
 
