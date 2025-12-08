@@ -10,7 +10,7 @@ warnings.filterwarnings('ignore')
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-n_iterations = 10
+n_iterations = 100
 
 from train_ml_models import PhotocatalysisPredictor
 from sklearn.metrics import r2_score, mean_absolute_error
