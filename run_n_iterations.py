@@ -173,11 +173,16 @@ def main():
     
     print("\nPushing results to GitHub...")
     try:
-        subprocess.run(['git', 'add', 'output/ml_iterations_*.xlsx'], check=True, cwd=os.getcwd())
-        subprocess.run(['git', 'commit', '-m', f'Add ML iteration results: {n_iterations} iterations completed'], 
-                      check=True, cwd=os.getcwd())
-        subprocess.run(['git', 'push'], check=True, cwd=os.getcwd())
-        print("✓ Results pushed to GitHub successfully!")
+        subprocess.run(['git', 'add', 'output/ml_iterations_*.xlsx'], check=False, cwd=os.getcwd())
+        result = subprocess.run(['git', 'commit', '-m', f'Add ML iteration results: {n_iterations} iterations completed'], 
+                               capture_output=True, text=True, cwd=os.getcwd())
+        if result.returncode == 0:
+            subprocess.run(['git', 'push'], check=True, cwd=os.getcwd())
+            print("✓ Results pushed to GitHub successfully!")
+        elif "nothing to commit" in result.stdout or "nothing to commit" in result.stderr:
+            print("✓ Excel files already up-to-date on GitHub")
+        else:
+            print(f"⚠ Warning: Git commit failed: {result.stderr}")
     except subprocess.CalledProcessError as e:
         print(f"⚠ Warning: Could not push to GitHub: {e}")
     
