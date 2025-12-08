@@ -145,8 +145,25 @@ material-synthesis/
 
 **±10% Error Band (gray)**: Acceptable measurement range
 
-**R² Score**: Model fit quality (1.0 = perfect)
+### Statistical Metrics
 
-**MAE**: Mean Absolute Error
+**R² (R-squared / Coefficient of Determination)**:
+- Measures how well the model predictions match the experimental data
+- Range: -∞ to 1.0
+- R² = 1.0: Perfect predictions (all points on the line)
+- R² = 0.0: Model performs no better than using the mean value
+- R² < 0.0: Model performs worse than a horizontal line
+- **Interpretation**: Higher R² indicates better model fit
 
-**Mean Error (%)**: Average percentage deviation
+**MAE (Mean Absolute Error)**:
+- Average of the absolute differences between predicted and experimental values
+- Same units as the measured property
+- MAE = 0: Perfect predictions
+- Lower MAE indicates more accurate predictions
+- **Example**: MAE = 0.534 nm for crystallite size means predictions are off by ~0.5 nm on average
+
+**Mean Error (%)**:
+- Average percentage deviation from experimental values
+- Normalized metric for comparing different properties
+- **Example**: Mean Error = 1.3% means predictions deviate by 1.3% from experimental values on average
+- Lower percentage indicates better relative accuracy
