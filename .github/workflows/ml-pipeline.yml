@@ -81,8 +81,8 @@ jobs:
     
     - name: Configure git
       run: |
-        git config --global user.email "github-actions@github.com"
-        git config --global user.name "GitHub Actions"
+        git config --global user.email "krishnakashab@github.com"
+        git config --global user.name "krishnakashablalwani"
     
     - name: Set up Python
       uses: actions/setup-python@v4
