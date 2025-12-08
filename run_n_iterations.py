@@ -177,8 +177,12 @@ def main():
         result = subprocess.run(['git', 'commit', '-m', f'Add ML iteration results: {n_iterations} iterations completed'], 
                                capture_output=True, text=True, cwd=os.getcwd())
         if result.returncode == 0:
-            subprocess.run(['git', 'push'], check=True, cwd=os.getcwd())
-            print("✓ Results pushed to GitHub successfully!")
+            push_result = subprocess.run(['git', 'push', 'origin', 'main'], 
+                                        capture_output=True, text=True, cwd=os.getcwd())
+            if push_result.returncode == 0:
+                print("✓ Results pushed to GitHub successfully!")
+            else:
+                print(f"⚠ Warning: Git push failed: {push_result.stderr}")
         elif "nothing to commit" in result.stdout or "nothing to commit" in result.stderr:
             print("✓ Excel files already up-to-date on GitHub")
         else:
