@@ -27,21 +27,13 @@ build/
 .DS_Store
 Thumbs.db
 
-# Output files (keep structure but not generated content)
-output/*.png
-output/comparison_table.csv
-output/summary_report.txt
-
-# Allow iteration results to be committed
-!output/*.xlsx
-!output/ml_iterations_*.xlsx
-
-# Keep output directory structure
-!output/.gitkeep
-
 # Data files - keep structure
 data/*.xlsx
 !data/.gitkeep
 
 # PDF papers
 *.pdf
+
+# Output folders
+output/
+output_ml_iterations//
