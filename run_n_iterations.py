@@ -137,7 +137,7 @@ def main():
     
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     
-    output_dir = Path('output')
+    output_dir = Path('output_ml_iterations')
     output_dir.mkdir(exist_ok=True)
     
     all_results_file = output_dir / f'ml_iterations_all_results_{n_iterations}.xlsx'
@@ -171,38 +171,39 @@ def main():
     print(f"Results saved to: {output_dir}/")
     print("="*70)
     
-    print("\nPushing results to GitHub...")
-    try:
-        print(f"  Adding files: output/ml_iterations_*.xlsx")
-        add_result = subprocess.run(['git', 'add', 'output/ml_iterations_*.xlsx'], 
-                                   capture_output=True, text=True, cwd=os.getcwd())
-        print(f"  Git add output: {add_result.stdout}{add_result.stderr}")
-        
-        status_result = subprocess.run(['git', 'status', '--short'], 
-                                      capture_output=True, text=True, cwd=os.getcwd())
-        print(f"  Git status:\n{status_result.stdout}")
-        
-        result = subprocess.run(['git', 'commit', '-m', f'Add ML iteration results: {n_iterations} iterations completed'], 
-                               capture_output=True, text=True, cwd=os.getcwd())
-        print(f"  Commit result: {result.stdout}{result.stderr}")
-        
-        if result.returncode == 0:
-            print(f"  Pushing to origin/main...")
-            push_result = subprocess.run(['git', 'push', 'origin', 'main'], 
+    if n_iterations >= 50:
+        print("\nPushing results to GitHub...")
+        try:
+            print(f"  Adding files: output/ml_iterations_*.xlsx")
+            add_result = subprocess.run(['git', 'add', 'output/ml_iterations_*.xlsx'], 
+                                    capture_output=True, text=True, cwd=os.getcwd())
+            print(f"  Git add output: {add_result.stdout}{add_result.stderr}")
+            
+            status_result = subprocess.run(['git', 'status', '--short'], 
                                         capture_output=True, text=True, cwd=os.getcwd())
-            print(f"  Push output: {push_result.stdout}{push_result.stderr}")
-            if push_result.returncode == 0:
-                print("✓ Results pushed to GitHub successfully!")
+            print(f"  Git status:\n{status_result.stdout}")
+            
+            result = subprocess.run(['git', 'commit', '-m', f'Add ML iteration results: {n_iterations} iterations completed'], 
+                                capture_output=True, text=True, cwd=os.getcwd())
+            print(f"  Commit result: {result.stdout}{result.stderr}")
+            
+            if result.returncode == 0:
+                print(f"  Pushing to origin/main...")
+                push_result = subprocess.run(['git', 'push', 'origin', 'main'], 
+                                            capture_output=True, text=True, cwd=os.getcwd())
+                print(f"  Push output: {push_result.stdout}{push_result.stderr}")
+                if push_result.returncode == 0:
+                    print("✓ Results pushed to GitHub successfully!")
+                else:
+                    print(f"⚠ Warning: Git push failed (return code {push_result.returncode})")
+            elif "nothing to commit" in result.stdout or "nothing to commit" in result.stderr:
+                print("✓ Excel files already up-to-date on GitHub")
             else:
-                print(f"⚠ Warning: Git push failed (return code {push_result.returncode})")
-        elif "nothing to commit" in result.stdout or "nothing to commit" in result.stderr:
-            print("✓ Excel files already up-to-date on GitHub")
-        else:
-            print(f"⚠ Warning: Git commit failed (return code {result.returncode})")
-    except subprocess.CalledProcessError as e:
-        print(f"⚠ Warning: Could not push to GitHub: {e}")
-    
-    print("="*70 + "\n")
+                print(f"⚠ Warning: Git commit failed (return code {result.returncode})")
+        except subprocess.CalledProcessError as e:
+            print(f"⚠ Warning: Could not push to GitHub: {e}")
+        
+        print("="*70 + "\n")
 
 
 if __name__ == "__main__":
