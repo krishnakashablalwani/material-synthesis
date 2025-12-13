@@ -30,6 +30,7 @@ Thumbs.db
 # Data files - keep structure
 data/*.xlsx
 !data/.gitkeep
+ZnFe2O3/data/
 
 # PDF papers
 *.pdf
